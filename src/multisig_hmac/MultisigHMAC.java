@@ -13,7 +13,6 @@ public class MultisigHMAC {
     int KEYBYTES, BYTES;
 
     public MultisigHMAC(Algorithm Alg) {
-
         switch (Alg) {
             case HmacSHA512:
                 PRIMITIVE = "HmacSHA512";

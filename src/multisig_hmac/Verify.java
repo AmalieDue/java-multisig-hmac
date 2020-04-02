@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Verify {
-
     public static boolean verify(List<Object[]> Keys, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
 
         int BitField = (int) Signature[0];
@@ -31,7 +30,6 @@ public class Verify {
     }
 
     public static List<Integer> keyIndexes(int BitField) {
-
         List<Integer> KeyIndexes = new ArrayList<>();
         int i = 0;
         while (BitField > 0) {
@@ -43,7 +41,6 @@ public class Verify {
     }
 
     public static int PopCount(int BitField) {
-
         return Integer.bitCount(BitField);
     }
 }

@@ -8,7 +8,6 @@ import java.util.List;
 public class VerifyDerived {
 
     public static boolean verifyderived(byte[] MasterSeed, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
-
         int BitField = (int) Signature[0];
         int nKeys = Verify.PopCount(BitField);
 
