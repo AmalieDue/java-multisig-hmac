@@ -1,3 +1,4 @@
 # Folders
-/.idea/
-/out/..
+.idea/
+out/
+*.iml
