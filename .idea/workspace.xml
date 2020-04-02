@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e44406dc-1288-4e53-9892-e45467195a01" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/multisig_hmac/MultisigHMAC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/multisig_hmac/MultisigHMAC.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +68,10 @@
       <screen x="0" y="23" width="1920" height="1057" />
     </state>
     <state x="164" y="65" key="#com.intellij.execution.impl.EditConfigurationsDialog/292.1103.1440.801/0.23.1920.1057@0.23.1920.1057" timestamp="1585836660955" />
+    <state x="450" y="213" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1585836980626">
+      <screen x="0" y="23" width="1920" height="1057" />
+    </state>
+    <state x="450" y="213" key="#com.intellij.fileTypes.FileTypeChooser/292.1103.1440.801/0.23.1920.1057@0.23.1920.1057" timestamp="1585836980626" />
     <state x="393" y="236" key="com.intellij.ide.util.TipDialog" timestamp="1585834668930">
       <screen x="0" y="23" width="1920" height="1057" />
     </state>
