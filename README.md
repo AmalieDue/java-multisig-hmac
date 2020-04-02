@@ -1,4 +1,4 @@
-# multisig-hmac-java-version
+# java-multisig-hmac
 
 > Multisig scheme for HMAC authentication. Java implementation of [multisig-hmac](https://github.com/emilbayes/multisig-hmac).
 
