@@ -1,26 +1,23 @@
 package multisig_hmac;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-public class DeriveKey {
-    IndexKey obj = new IndexKey();
+public class DeriveKey extends IndexKey {
 
     public DeriveKey(byte[] MasterSeed, int index, String Algorithm) throws InvalidKeyException, NoSuchAlgorithmException {
-        obj.index = index;
-        obj.key = derivekey(MasterSeed, index, Algorithm);
+        this.index = index;
+        this.key = derivekey(MasterSeed, index, Algorithm);
     }
 
     public static byte[] derivekey(byte[] MasterSeed, int index, String Algorithm) throws NoSuchAlgorithmException, InvalidKeyException {
-        String Data = "derived";
-        byte[] DataBytes = Data.getBytes();
+        byte[] DataBytes = "derived".getBytes();
         byte[] IndexArray = intToLittleEndian(index);
-        byte[] _scratch = new byte[DataBytes.length + IndexArray.length];
-        System.arraycopy(DataBytes,0,_scratch,0,DataBytes.length);
-        System.arraycopy(IndexArray,0,_scratch,DataBytes.length,IndexArray.length);
+        byte[] _scratch = ByteBuffer.allocate(DataBytes.length+IndexArray.length).put(DataBytes).put(IndexArray).array();
 
         byte[] ZERO = new byte[] {0x00};
         byte[] ONE = new byte[] {0x01};
@@ -36,11 +33,7 @@ public class DeriveKey {
         HMAC1.update(h0);
         byte[] h1 = HMAC1.doFinal(ONE);
 
-        byte[] FinalKey = new byte[h0.length + h1.length];
-        System.arraycopy(h0,0,FinalKey,0,h0.length);
-        System.arraycopy(h1,0,FinalKey,h0.length,h1.length);
-
-        return FinalKey;
+        return ByteBuffer.allocate(h0.length+h1.length).put(h0).put(h1).array();
     }
 
     public static byte[] SeedGen(int KEYBYTES) {
@@ -59,11 +52,4 @@ public class DeriveKey {
         b[3] = (byte) ((index >> 24) & 0xFF);
         return b;
     }
-
-    /*
-    private class IndexKey {
-        int index;
-        byte[] key;
-    }
-     */
 }

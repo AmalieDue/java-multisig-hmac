@@ -1,6 +1,9 @@
 package multisig_hmac;
 
-class IndexKey {
+abstract class IndexKey {
     int index;
     byte[] key;
+
+    IndexKey() {
+    }
 }

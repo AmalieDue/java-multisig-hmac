@@ -43,16 +43,16 @@ public class MultisigHMAC {
         byte[] Data = "hello world".getBytes();
 
         List<Sign> Signatures_stored = new ArrayList<>();
-        Signatures_stored.add(new Sign(k0.obj, Data, myObj.PRIMITIVE));
-        Signatures_stored.add(new Sign(k2.obj, Data, myObj.PRIMITIVE));
+        Signatures_stored.add(new Sign(k0, Data, myObj.PRIMITIVE));
+        Signatures_stored.add(new Sign(k2, Data, myObj.PRIMITIVE));
 
         Object[] out_stored = Combine.combine(Signatures_stored, myObj.BYTES);
 
         int Threshold = 2;
         List<IndexKey> Keys = new ArrayList<>();
-        Keys.add(k0.obj);
-        Keys.add(k1.obj);
-        Keys.add(k2.obj);
+        Keys.add(k0);
+        Keys.add(k1);
+        Keys.add(k2);
 
         System.out.println(Verify.verify(Keys, out_stored, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
 
@@ -66,8 +66,8 @@ public class MultisigHMAC {
         // Same data as in previous example
 
         List<Sign> Signatures_derived = new ArrayList<>();
-        Signatures_derived.add(new Sign(K0.obj, Data, myObj.PRIMITIVE));
-        Signatures_derived.add(new Sign(K2.obj, Data, myObj.PRIMITIVE));
+        Signatures_derived.add(new Sign(K0, Data, myObj.PRIMITIVE));
+        Signatures_derived.add(new Sign(K2, Data, myObj.PRIMITIVE));
 
         Object[] out_derived = Combine.combine(Signatures_derived, myObj.BYTES);
 
