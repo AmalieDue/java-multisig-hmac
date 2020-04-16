@@ -20,7 +20,7 @@ public class VerifyDerived {
 
         for (Integer usedKey : UsedKeys) {
             DeriveKey Key = new DeriveKey(MasterSeed, usedKey, Algorithm);
-            Sign KeySig = new Sign(Key.IndexKey, data, Algorithm);
+            Sign KeySig = new Sign(Key.obj, data, Algorithm);
             Sig = Combine.xorBytes(Sig, (byte[]) KeySig.IndexSign[1]);
             BitField ^= (int) KeySig.IndexSign[0];
         }

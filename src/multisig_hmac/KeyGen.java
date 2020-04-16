@@ -3,11 +3,11 @@ package multisig_hmac;
 import java.security.SecureRandom;
 
 public class KeyGen {
-    Object[] IndexKey = new Object[2];
+    IndexKey obj = new IndexKey();
 
     public KeyGen(int index, int KEYBYTES) {
-        IndexKey[0] = index;
-        IndexKey[1] = keygen(KEYBYTES);
+        obj.index = index;
+        obj.key = keygen(KEYBYTES);
     }
 
     public static byte[] keygen(int KEYBYTES) {
@@ -17,4 +17,11 @@ public class KeyGen {
 
         return Key;
     }
+
+    /*
+    private class IndexKey {
+        int index;
+        byte[] key;
+    }
+     */
 }

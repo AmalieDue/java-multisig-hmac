@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Verify {
-    public static boolean verify(List<Object[]> Keys, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+    public static boolean verify(List<IndexKey> Keys, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
 
         int BitField = (int) Signature[0];
         int nKeys = PopCount(BitField);
@@ -20,7 +20,7 @@ public class Verify {
         byte[] Sig = (byte[]) Signature[1];
 
         for (Object obj : UsedKeys) {
-            Object[] Key = Keys.get((Integer) obj);
+            IndexKey Key = Keys.get((Integer) obj);
             Sign KeySig = new Sign(Key, data, Algorithm);
             Sig = multisig_hmac.Combine.xorBytes(Sig, (byte[]) KeySig.IndexSign[1]);
             BitField ^= (int) KeySig.IndexSign[0];

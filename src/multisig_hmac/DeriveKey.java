@@ -7,11 +7,11 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public class DeriveKey {
-    Object[] IndexKey = new Object[2];
+    IndexKey obj = new IndexKey();
 
     public DeriveKey(byte[] MasterSeed, int index, String Algorithm) throws InvalidKeyException, NoSuchAlgorithmException {
-        IndexKey[0] = index;
-        IndexKey[1] = derivekey(MasterSeed, index, Algorithm);
+        obj.index = index;
+        obj.key = derivekey(MasterSeed, index, Algorithm);
     }
 
     public static byte[] derivekey(byte[] MasterSeed, int index, String Algorithm) throws NoSuchAlgorithmException, InvalidKeyException {
@@ -59,4 +59,11 @@ public class DeriveKey {
         b[3] = (byte) ((index >> 24) & 0xFF);
         return b;
     }
+
+    /*
+    private class IndexKey {
+        int index;
+        byte[] key;
+    }
+     */
 }
