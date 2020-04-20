@@ -6,10 +6,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Verify represents the verification of a signature of data against a list of keys.
+ *
+ * @author Amalie Due Jensen
+ */
 public class Verify {
-    public static boolean verify(List<IndexKey> Keys, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
 
-        int BitField = (int) Signature[0];
+    /**
+     * Verifies a signature of data against a list of keys
+     *
+     * @param Keys - list of all keys
+     * @param Signature - combined signature
+     * @param data - data which has been signed
+     * @param Threshold - minimum number of keys that the list Keys should contain
+     * @param Algorithm - algorithm used for HMAC
+     * @param BYTES - length of signature
+     * @return verification of the signature (true/false)
+     * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
+     * @throws NoSuchAlgorithmException - if the specified algorithm is not available
+     */
+    public static boolean verify(List<IndexKey> Keys, Combine Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+
+        int BitField = Signature.bitfield;
         int nKeys = PopCount(BitField);
 
         if (nKeys < Threshold) {
@@ -17,7 +36,7 @@ public class Verify {
         }
 
         List<Integer> UsedKeys = keyIndexes(BitField);
-        byte[] Sig = (byte[]) Signature[1];
+        byte[] Sig = Signature.sig;
 
         for (Object obj : UsedKeys) {
             IndexKey Key = Keys.get((Integer) obj);
@@ -29,6 +48,12 @@ public class Verify {
         return (BitField == 0 && Arrays.equals(Sig,new byte[BYTES]));
     }
 
+    /**
+     * Finds the indexes of the keys (i.e. high bits)
+     *
+     * @param BitField - indexes of keys represented as an integer
+     * @return indexes of keys represented as a list
+     */
     public static List<Integer> keyIndexes(int BitField) {
         List<Integer> KeyIndexes = new ArrayList<>();
         int i = 0;
@@ -40,6 +65,12 @@ public class Verify {
         return KeyIndexes;
     }
 
+    /**
+     * Computes the number of keys (i.e. high bits)
+     *
+     * @param BitField - indexes of keys represented as an integer
+     * @return the number of keys
+     */
     public static int PopCount(int BitField) {
         return Integer.bitCount(BitField);
     }

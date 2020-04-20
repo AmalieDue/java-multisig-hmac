@@ -5,10 +5,29 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * VerifyDerived represents the verification of a signature of data against dynamically
+ * derived keys from a master seed.
+ *
+ * @author Amalie Due Jensen
+ */
 public class VerifyDerived {
 
-    public static boolean verifyderived(byte[] MasterSeed, Object[] Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
-        int BitField = (int) Signature[0];
+    /**
+     * Verifies a signature of data against dynamically derived keys from a master seed
+     *
+     * @param MasterSeed - master seed which the keys are derived from
+     * @param Signature - combined signature
+     * @param data - data which has been signed
+     * @param Threshold - minimum number of used keys
+     * @param Algorithm - algorithm used for HMAC
+     * @param BYTES - length of signature
+     * @return verification of the signature (true/false)
+     * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
+     * @throws NoSuchAlgorithmException - if the specified algorithm is not available
+     */
+    public static boolean verifyderived(byte[] MasterSeed, Combine Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+        int BitField = Signature.bitfield;
         int nKeys = Verify.PopCount(BitField);
 
         if(nKeys < Threshold) {
@@ -16,7 +35,7 @@ public class VerifyDerived {
         }
 
         List<Integer> UsedKeys = Verify.keyIndexes(BitField);
-        byte[] Sig = (byte[]) Signature[1];
+        byte[] Sig = Signature.sig;
 
         for (Integer usedKey : UsedKeys) {
             DeriveKey Key = new DeriveKey(MasterSeed, usedKey, Algorithm);

@@ -2,31 +2,51 @@ package multisig_hmac;
 
 import java.util.List;
 
+/**
+ * Combine represents a list of signatures combined into one signature
+ *
+ * @author Amalie Due Jensen
+ */
 public class Combine {
+    int bitfield;
+    byte[] sig;
 
-    public static Object[] combine(List<Sign> Signatures, int BYTES) {
-        Object[] Combined = new Object[2];
+    /**
+     * Constructs and initializes a combined signature.
+     *
+     * The signatures which are combined have all been signed independently.
+     * Only include each signature once, otherwise they will cancel out.
+     * Signatures can be combined in any order.
+     *
+     * @param Signatures - list of signatures which should be combined
+     * @param BYTES - length of combined signature
+     */
+    public Combine(List<Sign> Signatures, int BYTES) {
+        int bitfield_current = 0;
+        byte[] sig_current = new byte[BYTES];
 
-        int BitField = 0;
-        byte[] Sig = new byte[BYTES];
-
-        for (Sign obj : Signatures) {
-            BitField ^= obj.index;
-            Sig = xorBytes(Sig, obj.sign);
+        for (Sign obj: Signatures) {
+            bitfield_current ^= obj.index;
+            sig_current = xorBytes(sig_current, obj.sign);
         }
 
-        Combined[0] = BitField;
-        Combined[1] = Sig;
-
-        return Combined;
+        this.bitfield = bitfield_current;
+        this.sig = sig_current;
     }
 
+    /**
+     * Xor two byte arrays
+     *
+     * @param a - first byte array
+     * @param b - second byte array
+     * @return result of xor'ing a and b
+     */
     public static byte[] xorBytes(byte[] a, byte[] b) {
-        byte[] result = new byte[32];
+        byte[] c = new byte[32];
         for (int i = 0; i < Math.max(a.length,b.length); i++) {
-            result[i] = (byte) (a[i] ^ b[i]);
+            c[i] = (byte) (a[i] ^ b[i]);
         }
 
-        return result;
+        return c;
     }
 }

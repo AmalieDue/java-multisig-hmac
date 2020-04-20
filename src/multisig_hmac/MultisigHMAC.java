@@ -8,10 +8,21 @@ enum Algorithm {
     HmacSHA384
 }
 
+/**
+ * Multisig scheme for HMAC authentication. Java implementation of https://github.com/emilbayes/multisig-hmac.
+ *
+ * @author Amalie Due Jensen
+ * @version 0.1.0
+ */
 public class MultisigHMAC {
     String PRIMITIVE;
     int KEYBYTES, BYTES;
 
+    /**
+     * Constructs and initializes a new instance of Multisig HMAC
+     *
+     * @param Alg - algorithm used for HMAC
+     */
     public MultisigHMAC(Algorithm Alg) {
         switch (Alg) {
             case HmacSHA512:
@@ -46,7 +57,8 @@ public class MultisigHMAC {
         Signatures_stored.add(new Sign(k0, Data, myObj.PRIMITIVE));
         Signatures_stored.add(new Sign(k2, Data, myObj.PRIMITIVE));
 
-        Object[] out_stored = Combine.combine(Signatures_stored, myObj.BYTES);
+        //Object[] out_stored = Combine.combine(Signatures_stored, myObj.BYTES);
+        Combine combined_stored = new Combine(Signatures_stored, myObj.BYTES);
 
         int Threshold = 2;
         List<IndexKey> Keys = new ArrayList<>();
@@ -54,7 +66,7 @@ public class MultisigHMAC {
         Keys.add(k1);
         Keys.add(k2);
 
-        System.out.println(Verify.verify(Keys, out_stored, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
+        System.out.println(Verify.verify(Keys, combined_stored, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
 
         // Example with derived keys
         byte[] Seed = DeriveKey.SeedGen(myObj.KEYBYTES);
@@ -69,10 +81,11 @@ public class MultisigHMAC {
         Signatures_derived.add(new Sign(K0, Data, myObj.PRIMITIVE));
         Signatures_derived.add(new Sign(K2, Data, myObj.PRIMITIVE));
 
-        Object[] out_derived = Combine.combine(Signatures_derived, myObj.BYTES);
+        //Object[] out_derived = Combine.combine(Signatures_derived, myObj.BYTES);
+        Combine combined_derived = new Combine(Signatures_derived, myObj.BYTES);
 
         // Same threshold as in previous example
 
-        System.out.println(VerifyDerived.verifyderived(Seed, out_derived, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
+        System.out.println(VerifyDerived.verifyderived(Seed, combined_derived, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
     }
 }
