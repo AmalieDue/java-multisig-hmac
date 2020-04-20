@@ -4,6 +4,6 @@ abstract class IndexKey {
     int index;
     byte[] key;
 
-    IndexKey() {
-    }
+    //IndexKey() {
+    //}
 }

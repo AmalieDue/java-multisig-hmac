@@ -11,8 +11,8 @@ public class Combine {
         byte[] Sig = new byte[BYTES];
 
         for (Sign obj : Signatures) {
-            BitField ^= (int) obj.IndexSign[0];
-            Sig = xorBytes(Sig, (byte[]) obj.IndexSign[1]);
+            BitField ^= obj.index;
+            Sig = xorBytes(Sig, obj.sign);
         }
 
         Combined[0] = BitField;

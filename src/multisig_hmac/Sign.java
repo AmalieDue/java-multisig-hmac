@@ -6,11 +6,12 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public class Sign {
-    Object[] IndexSign = new Object[2];
+    final int index;
+    final byte[] sign;
 
     public Sign(IndexKey KeyObj, byte[] Data, String Algorithm) throws InvalidKeyException, NoSuchAlgorithmException {
-        IndexSign[0] = 1 << KeyObj.index;
-        IndexSign[1] = sign(KeyObj, Data, Algorithm);
+        this.index = 1 << KeyObj.index;
+        this.sign = sign(KeyObj, Data, Algorithm);
     }
 
     public static byte[] sign(IndexKey KeyObj, byte[] Data, String Algorithm) throws NoSuchAlgorithmException, InvalidKeyException {
