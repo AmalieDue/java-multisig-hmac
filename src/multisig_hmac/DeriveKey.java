@@ -32,9 +32,17 @@ public class DeriveKey extends IndexKey {
     }
 
     /**
-     * Derives a new sub key from a master seed
+     * Derives a new sub key from a master seed.
      *
-     * @param MasterSeed - master seed used to derive keys
+     * Note that index should be counted from 0.
+     * The bitfield used with the signature has as many bits as the largest index,
+     * hence in practice you want to keep the indexes low.
+     *
+     * Keys are derived using a KDF based on HMAC:
+     * b[0...BYTES] = HMAC(Key = MasterSeed, data = "derived" || U32LE(index) || 0x00)
+     * b[BYTES...] = HMAC(Key = MasterSeed, b[0...BYTES] || 0x01)
+     *
+     * @param MasterSeed - master seed in bytes of length KEYBYTES used to derive keys
      * @param index - index of the key
      * @param Algorithm - algorithm used for HMAC
      * @return the derived key in bytes of length KEYBYTES

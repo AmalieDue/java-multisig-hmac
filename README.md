@@ -8,7 +8,7 @@ Key management can happen in either of two modes, either by storing every of the
 Example using stored keys:
 
 ```java
-public static void main(String[] args) throws Exception {
+public static void multisig_hmac(String[] args) throws Exception {
     MultisigHMAC myObj = new MultisigHMAC(Algorithm.HmacSHA256);
 
     KeyGen k0 = new KeyGen(0, myObj.KEYBYTES);
@@ -35,7 +35,7 @@ public static void main(String[] args) throws Exception {
 
 Example using derived keys:
 ```java
-public static void main(String[] args) throws Exception {
+public static void multisig_hmac(String[] args) throws Exception {
     MultisigHMAC myObj = new MultisigHMAC(Algorithm.HmacSHA256);
 
     byte[] Seed = DeriveKey.SeedGen(myObj.KEYBYTES);

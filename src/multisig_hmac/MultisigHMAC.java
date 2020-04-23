@@ -2,14 +2,9 @@ package multisig_hmac;
 
 import java.util.*;
 
-enum Algorithm {
-    HmacSHA256,
-    HmacSHA512,
-    HmacSHA384
-}
-
 /**
- * Multisig scheme for HMAC authentication. Java implementation of https://github.com/emilbayes/multisig-hmac.
+ * Multisig scheme for HMAC authentication. Java implementation
+ * of https://github.com/emilbayes/multisig-hmac.
  *
  * @author Amalie Due Jensen
  * @version 0.1.0
@@ -19,12 +14,26 @@ public class MultisigHMAC {
     int KEYBYTES, BYTES;
 
     /**
+     * The implementation supports SHA256, SHA512, and SHA384 for HMAC
+     */
+    enum Algorithm {
+        HmacSHA256,
+        HmacSHA512,
+        HmacSHA384
+    }
+
+    /**
      * Constructs and initializes a new instance of Multisig HMAC
+     * and sets the algorithm to be used for subsequent methods.
      *
      * @param Alg - algorithm used for HMAC
      */
     public MultisigHMAC(Algorithm Alg) {
         switch (Alg) {
+            case HmacSHA256:
+                PRIMITIVE = "HmacSHA256";
+                KEYBYTES = 64;
+                BYTES = 32;
             case HmacSHA512:
                 PRIMITIVE = "HmacSHA512";
                 KEYBYTES = 128;
@@ -35,10 +44,6 @@ public class MultisigHMAC {
                 KEYBYTES = 128;
                 BYTES = 48;
                 break;
-            default:
-                PRIMITIVE = "HmacSHA256";
-                KEYBYTES = 64;
-                BYTES = 32;
         }
     }
 
@@ -47,7 +52,6 @@ public class MultisigHMAC {
 
         // Example with stored keys
         KeyGen k0 = new KeyGen(0, myObj.KEYBYTES);
-        //System.out.println("Index: " + k0.IndexKey[0] + " Key: " + Base64.getEncoder().encodeToString((byte[]) k0.IndexKey[1]));
         KeyGen k1 = new KeyGen(1, myObj.KEYBYTES);
         KeyGen k2 = new KeyGen(2, myObj.KEYBYTES);
 
@@ -57,7 +61,6 @@ public class MultisigHMAC {
         Signatures_stored.add(new Sign(k0, Data, myObj.PRIMITIVE));
         Signatures_stored.add(new Sign(k2, Data, myObj.PRIMITIVE));
 
-        //Object[] out_stored = Combine.combine(Signatures_stored, myObj.BYTES);
         Combine combined_stored = new Combine(Signatures_stored, myObj.BYTES);
 
         int Threshold = 2;
@@ -75,16 +78,13 @@ public class MultisigHMAC {
         DeriveKey K1 = new DeriveKey(Seed, 1, myObj.PRIMITIVE);
         DeriveKey K2 = new DeriveKey(Seed, 2, myObj.PRIMITIVE);
 
-        // Same data as in previous example
+        // Same data and threshold as in previous example
 
         List<Sign> Signatures_derived = new ArrayList<>();
         Signatures_derived.add(new Sign(K0, Data, myObj.PRIMITIVE));
         Signatures_derived.add(new Sign(K2, Data, myObj.PRIMITIVE));
 
-        //Object[] out_derived = Combine.combine(Signatures_derived, myObj.BYTES);
         Combine combined_derived = new Combine(Signatures_derived, myObj.BYTES);
-
-        // Same threshold as in previous example
 
         System.out.println(VerifyDerived.verifyderived(Seed, combined_derived, Data, Threshold, myObj.PRIMITIVE, myObj.BYTES));
     }

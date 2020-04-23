@@ -12,7 +12,8 @@ import java.security.SecureRandom;
 public class KeyGen extends IndexKey {
 
     /**
-     * Constructs and initializes a pair of index + a new cryptographically random key
+     * Constructs and initializes a pair of index + a new cryptographically random key.
+     * Note that index should be counted from 0.
      *
      * @param index - index of the key
      * @param KEYBYTES - length of the key

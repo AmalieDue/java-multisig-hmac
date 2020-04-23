@@ -17,6 +17,8 @@ public class Sign {
     /**
      * Constructs and initializes a sign of data with a key
      *
+     * A list of instances of Sign can be passed to an instance of Combine
+     *
      * @param KeyObj - instance of IndexKey
      * @param Data - data which should be signed
      * @param Algorithm - algorithm used for HMAC
@@ -29,7 +31,7 @@ public class Sign {
     }
 
     /**
-     * Signs data with a key
+     * Independently signs data with a key
      *
      * @param KeyObj - instance of indexKey
      * @param Data - data which should be signed

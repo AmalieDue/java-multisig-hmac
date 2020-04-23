@@ -3,7 +3,7 @@ package multisig_hmac;
 import java.util.List;
 
 /**
- * Combine represents a list of signatures combined into one signature
+ * Combine combines a list of signatures which have all been signed independently into one signature
  *
  * @author Amalie Due Jensen
  */
@@ -14,11 +14,10 @@ public class Combine {
     /**
      * Constructs and initializes a combined signature.
      *
-     * The signatures which are combined have all been signed independently.
      * Only include each signature once, otherwise they will cancel out.
      * Signatures can be combined in any order.
      *
-     * @param Signatures - list of signatures which should be combined
+     * @param Signatures - list of signatures
      * @param BYTES - length of combined signature
      */
     public Combine(List<Sign> Signatures, int BYTES) {

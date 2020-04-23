@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * VerifyDerived represents the verification of a signature of data against dynamically
+ * VerifyDerived represents a verification of a signature of data against dynamically
  * derived keys from a master seed.
  *
  * @author Amalie Due Jensen
@@ -16,7 +16,7 @@ public class VerifyDerived {
     /**
      * Verifies a signature of data against dynamically derived keys from a master seed
      *
-     * @param MasterSeed - master seed which the keys are derived from
+     * @param MasterSeed - master seed in bytes of length KEYBYTES which the keys are derived from
      * @param Signature - combined signature
      * @param data - data which has been signed
      * @param Threshold - minimum number of used keys

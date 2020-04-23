@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Verify represents the verification of a signature of data against a list of keys.
+ * Verify represents a verification of a signature of data against a list of keys.
  *
  * @author Amalie Due Jensen
  */
@@ -49,10 +49,10 @@ public class Verify {
     }
 
     /**
-     * Finds the indexes of the keys (i.e. high bits)
+     * Computes the indexes of the keys (i.e. high bits)
      *
-     * @param BitField - indexes of keys represented as an integer
-     * @return indexes of keys represented as a list
+     * @param BitField - indexes of keys represented as one integer
+     * @return indexes of keys in a list
      */
     public static List<Integer> keyIndexes(int BitField) {
         List<Integer> KeyIndexes = new ArrayList<>();
@@ -68,7 +68,7 @@ public class Verify {
     /**
      * Computes the number of keys (i.e. high bits)
      *
-     * @param BitField - indexes of keys represented as an integer
+     * @param BitField - indexes of keys represented as one integer
      * @return the number of keys
      */
     public static int PopCount(int BitField) {
