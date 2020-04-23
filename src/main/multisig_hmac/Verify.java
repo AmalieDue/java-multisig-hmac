@@ -41,7 +41,7 @@ public class Verify {
         for (Object obj : UsedKeys) {
             IndexKey Key = Keys.get((Integer) obj);
             Sign KeySig = new Sign(Key, data, Algorithm);
-            Sig = multisig_hmac.Combine.xorBytes(Sig, KeySig.sign);
+            Sig = multisig_hmac.Combine.xorBytes(Sig, KeySig.sign, BYTES);
             BitField ^= KeySig.index;
         }
 

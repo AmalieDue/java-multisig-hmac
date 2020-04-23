@@ -26,7 +26,7 @@ public class Combine {
 
         for (Sign obj: Signatures) {
             bitfield_current ^= obj.index;
-            sig_current = xorBytes(sig_current, obj.sign);
+            sig_current = xorBytes(sig_current, obj.sign, BYTES);
         }
 
         this.bitfield = bitfield_current;
@@ -40,8 +40,8 @@ public class Combine {
      * @param b - second byte array
      * @return result of xor'ing a and b
      */
-    public static byte[] xorBytes(byte[] a, byte[] b) {
-        byte[] c = new byte[32];
+    public static byte[] xorBytes(byte[] a, byte[] b, int BYTES) {
+        byte[] c = new byte[BYTES];
         for (int i = 0; i < Math.max(a.length,b.length); i++) {
             c[i] = (byte) (a[i] ^ b[i]);
         }
