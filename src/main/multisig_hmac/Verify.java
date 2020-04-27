@@ -27,6 +27,7 @@ public class Verify {
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
      */
     public static boolean verify(List<IndexKey> Keys, Combine Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+        assert Threshold > 0 : "Threshold must be at least 1";
 
         int BitField = Signature.bitfield;
         int nKeys = PopCount(BitField);

@@ -13,8 +13,8 @@ class KeyGenTest {
         assertEquals(k0.key.length, myObj.KEYBYTES);
     }
 
-    @org.junit.jupiter.api.Test
-    void keygenTest() {
+    //@org.junit.jupiter.api.Test
+    //void keygenTest() {
 
-    }
+    //}
 }
