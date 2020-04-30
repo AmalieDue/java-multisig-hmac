@@ -27,10 +27,14 @@ public class Verify {
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
      */
     public static boolean verify(List<IndexKey> Keys, Combine Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+        assert Signature.sig.length == BYTES: "Signature must be BYTES long";
+        assert data != null : "data must be bytes";
         assert Threshold > 0 : "Threshold must be at least 1";
 
         int BitField = Signature.bitfield;
         int nKeys = PopCount(BitField);
+        int HighestKey = 32 - LeadingZeros(BitField);
+        assert Keys.size() >= nKeys && Keys.size() >= HighestKey : "Not enough keys given based on Signature.bitfield";
 
         if (nKeys < Threshold) {
             return false;
@@ -42,7 +46,7 @@ public class Verify {
         for (Object obj : UsedKeys) {
             IndexKey Key = Keys.get((Integer) obj);
             Sign KeySig = new Sign(Key, data, Algorithm);
-            Sig = multisig_hmac.Combine.xorBytes(Sig, KeySig.sign, BYTES);
+            Sig = Combine.xorBytes(Sig, KeySig.sign, BYTES);
             BitField ^= KeySig.index;
         }
 
@@ -74,5 +78,20 @@ public class Verify {
      */
     public static int PopCount(int BitField) {
         return Integer.bitCount(BitField);
+    }
+
+    public static int LeadingZeros(int BitField) {
+        int n = 32;
+        int c = 16;
+        int y;
+        while(c != 0) {
+            y = BitField >> c;
+            if(y != 0) {
+                n = n - c;
+                BitField = y;
+            }
+            c = c >> 1;
+        }
+        return n - BitField;
     }
 }
