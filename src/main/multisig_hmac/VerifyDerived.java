@@ -26,7 +26,11 @@ public class VerifyDerived {
      * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
      */
-    public static boolean verifyderived(byte[] MasterSeed, Combine Signature, byte[] data, int Threshold, String Algorithm, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+    public static boolean verifyderived(byte[] MasterSeed, Combine Signature, byte[] data, int Threshold, String Algorithm, int KEYBYTES, int BYTES) throws InvalidKeyException, NoSuchAlgorithmException {
+        assert MasterSeed.length == KEYBYTES : "MasterSeed must be KEYBYTES long";
+        assert Signature.sig.length == BYTES: "Signature must be BYTES long";
+        assert Threshold > 0 : "Threshold must be at least 1";
+
         int BitField = Signature.bitfield;
         int nKeys = Verify.PopCount(BitField);
 
