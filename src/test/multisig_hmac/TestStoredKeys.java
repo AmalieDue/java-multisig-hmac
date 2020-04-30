@@ -1,12 +1,30 @@
 package multisig_hmac;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static java.time.Duration.ofMillis;
+import static java.time.Duration.ofMinutes;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeout;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.CountDownLatch;
+
+//import example.domain.Person;
+//import example.util.Calculator;
+
+import org.junit.jupiter.api.Test;
 
 public class TestStoredKeys {
     MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
@@ -63,10 +81,15 @@ public class TestStoredKeys {
         // no keys
         List<IndexKey> Keys = new ArrayList<>();
         int Threshold = 2;
-        try {
-            Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES);
-        } catch (AssertionError ignored) {
-        }
+
+        AssertionError exception = assertThrows(AssertionError.class, () ->
+                Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        assertEquals("Not enough keys given based on Signature.bitfield", exception.getMessage());
+
+        //try {
+        //    Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES);
+        //} catch (AssertionError ignored) {
+        //}
 
         // missing some keys
         Keys.add(k0);
