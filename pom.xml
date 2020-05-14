@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>Hyperdivision</groupId>
+    <artifactId>java-multisig-hmac</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>java-multisig-hmac</name>
+    <description>Multisig scheme for HMAC authentication</description>
+    <url>https://github.com/AmalieDue/java-multisig-hmac</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Amalie Due Jensen</name>
+            <email>amalieduejensen@hotmail.com</email>
+            <organization>Hyperdivision</organization>
+            <organizationUrl>https://www.hyperdivision.dk</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com/AmalieDue/java-multisig-hmac.git</connection>
+        <developerConnection>scm:git:ssh://github.com:AmalieDue/java-multisig-hmac.git</developerConnection>
+        <url>https://github.com/AmalieDue/java-multisig-hmac</url>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>src/main/resources/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
