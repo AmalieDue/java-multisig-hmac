@@ -1,4 +1,8 @@
 # Folders
 .idea/
 out/
+target/
+
+# Files
 *.iml
+.DS_Store
