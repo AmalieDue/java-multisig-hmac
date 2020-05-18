@@ -1,6 +1,6 @@
 # java-multisig-hmac
 
-> Multisig scheme for HMAC authentication. A Maven project of [multisig-hmac](https://github.com/emilbayes/multisig-hmac).
+> Multisig scheme for HMAC authentication. A Maven project of [multisig-hmac](https://github.com/emilbayes/multisig-hmac) and [py-multisig-hmac](https://github.com/AmalieDue/py-multisig-hmac).
 
 ## Usage
 
