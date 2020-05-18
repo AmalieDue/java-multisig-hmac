@@ -1,0 +1,10 @@
+dk/hyperdivision/multisig_hmac/Sign.class
+dk/hyperdivision/multisig_hmac/Combine.class
+dk/hyperdivision/multisig_hmac/VerifyDerived.class
+dk/hyperdivision/multisig_hmac/IndexKey.class
+dk/hyperdivision/multisig_hmac/MultisigHMAC$Algorithm.class
+dk/hyperdivision/multisig_hmac/KeyGen.class
+dk/hyperdivision/multisig_hmac/DeriveKey.class
+dk/hyperdivision/multisig_hmac/Verify.class
+dk/hyperdivision/multisig_hmac/MultisigHMAC.class
+dk/hyperdivision/multisig_hmac/MultisigHMAC$1.class
