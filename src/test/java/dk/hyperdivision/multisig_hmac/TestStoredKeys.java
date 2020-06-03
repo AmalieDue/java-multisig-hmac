@@ -1,7 +1,6 @@
 package dk.hyperdivision.multisig_hmac;
 
 import org.junit.jupiter.api.Test;
-
 import java.util.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -21,20 +20,20 @@ public class TestStoredKeys {
     AssertionError exception;
 
     @Test
-    public void SimpleTest() throws InvalidKeyException, NoSuchAlgorithmException {
+    public void simpleTest() throws InvalidKeyException, NoSuchAlgorithmException {
         assertNotNull(k0.key);
         assertEquals(k0.key.length, m.KEYBYTES);
 
-        // The data-input to the Sign class has 3 equiv classes: Empty, less
+        // The message-input to the MultisigHMAC.sign method has 3 equiv classes: Empty, less
         // than block size, larger than block size. These are tested below
-        byte[] dataEmpty = "".getBytes();
-        byte[] dataShort = "hello world".getBytes();
+        byte[] messageEmpty = "".getBytes();
+        byte[] messageShort = "hello world".getBytes();
         String str = "hello world";
-        byte[] dataLong = str.repeat(100).getBytes();
+        byte[] messageLong = str.repeat(100).getBytes();
 
-        Signature sEmpty = m.sign(k0, dataEmpty);
-        Signature sShort = m.sign(k0, dataShort);
-        Signature sLong = m.sign(k0, dataLong);
+        Signature sEmpty = m.sign(k0, messageEmpty);
+        Signature sShort = m.sign(k0, messageShort);
+        Signature sLong = m.sign(k0, messageLong);
         assertEquals(sEmpty.signature.length, m.BYTES);
         assertEquals(sShort.signature.length, m.BYTES);
         assertEquals(sLong.signature.length, m.BYTES);
@@ -45,10 +44,10 @@ public class TestStoredKeys {
         assertEquals(combined.signature.length, m.getBYTES());
     }
 
-    // The inputs to the Verify method have more equiv classes
+    // The inputs to the MultisigHMAC.verify method have more equiv classes
 
     @Test
-    public void Test_Keys() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void testKeys() throws NoSuchAlgorithmException, InvalidKeyException {
         // The following keys-inputs are tested:
         //  - no keys
         //  - missing some keys
@@ -72,13 +71,13 @@ public class TestStoredKeys {
 
         exception = assertThrows(AssertionError.class, () ->
                 m.verify(keys, combined, message, threshold));
-        assertEquals("Not enough keys given based on Signature.bitfield", exception.getMessage());
+        assertEquals("Not enough keys given based on index of the combined-Signature", exception.getMessage());
 
         // missing some keys
         keys.add(k0);
         exception = assertThrows(AssertionError.class, () ->
                 m.verify(keys, combined, message, threshold));
-        assertEquals("Not enough keys given based on Signature.bitfield", exception.getMessage());
+        assertEquals("Not enough keys given based on index of the combined-Signature", exception.getMessage());
 
         // too many keys
         keys.add(k1);
@@ -94,10 +93,10 @@ public class TestStoredKeys {
     }
 
     @Test
-    public void Test_Signature() throws NoSuchAlgorithmException, InvalidKeyException {
-        // The following Signature-inputs are tested:
+    public void testSignature() throws NoSuchAlgorithmException, InvalidKeyException {
+        // The following signature-inputs are tested:
         //  - empty signature
-        //  - signature with wrong bitfield
+        //  - signature with wrong index
         //  - signature with too many signatures
         //  - signature with too few signatures
         //  - signature with exactly correct signatures
@@ -125,7 +124,7 @@ public class TestStoredKeys {
                 m.verify(keys, combined, message, threshold));
         assertEquals("Signature must be BYTES long", exception.getMessage());
 
-        // signature with wrong bitfield
+        // signature with wrong index
         Signature combined1 = m.combine(signatures);
         combined1.index = 0;
         assertFalse(m.verify(keys, combined1, message, threshold));
@@ -147,23 +146,23 @@ public class TestStoredKeys {
     }
 
     @Test
-    public void testData() throws NoSuchAlgorithmException, InvalidKeyException {
-        // The following Data-inputs are tested:
-        //  - Same equiv classes as for the Sign method
-        //  - Incorrect data (length - 1, length, length + 1, wrong data)
+    public void testMessage() throws NoSuchAlgorithmException, InvalidKeyException {
+        // The following message-inputs are tested:
+        //  - Same equiv classes as for the MultisigHMAC.sign method
+        //  - Incorrect message (length - 1, length, length + 1, wrong message)
 
-        // same equiv classes as for the sign function
-        byte[] dataEmpty = "".getBytes();
-        byte[] dataShort = "hello world".getBytes();
+        // same equiv classes as for the MultisigHMAC.sign method
+        byte[] messageEmpty = "".getBytes();
+        byte[] messageShort = "hello world".getBytes();
         String str = "hello world";
-        byte[] dataLong = str.repeat(100).getBytes();
+        byte[] messageLong = str.repeat(100).getBytes();
 
-        Signature s0_empty = m.sign(k0, dataEmpty);
-        Signature s1_empty = m.sign(k1, dataEmpty);
-        Signature s0_short = m.sign(k0, dataShort);
-        Signature s1_short = m.sign(k1, dataShort);
-        Signature s0_long = m.sign(k0, dataLong);
-        Signature s1_long = m.sign(k1, dataLong);
+        Signature s0_empty = m.sign(k0, messageEmpty);
+        Signature s1_empty = m.sign(k1, messageEmpty);
+        Signature s0_short = m.sign(k0, messageShort);
+        Signature s1_short = m.sign(k1, messageShort);
+        Signature s0_long = m.sign(k0, messageLong);
+        Signature s1_long = m.sign(k1, messageLong);
 
         List<Signature> signaturesEmpty = new ArrayList<>();
         List<Signature> signaturesShort = new ArrayList<>();
@@ -183,27 +182,27 @@ public class TestStoredKeys {
         Signature combinedShort = m.combine(signaturesShort);
         Signature combinedLong = m.combine(signaturesLong);
 
-        assertTrue(m.verify(keys, combinedEmpty, dataEmpty, threshold));
-        assertTrue(m.verify(keys, combinedShort, dataShort, threshold));
-        assertTrue(m.verify(keys, combinedLong, dataLong, threshold));
+        assertTrue(m.verify(keys, combinedEmpty, messageEmpty, threshold));
+        assertTrue(m.verify(keys, combinedShort, messageShort, threshold));
+        assertTrue(m.verify(keys, combinedLong, messageLong, threshold));
 
         // incorrect data
-        byte[] data_wrong1 = "hello worl".getBytes();
-        byte[] data_wrong2 = "hello worldd".getBytes();
+        byte[] messageWrong1 = "hello worl".getBytes();
+        byte[] messageWrong2 = "hello worldd".getBytes();
 
-        assertFalse(m.verify(keys, combinedShort, data_wrong1, threshold));
-        assertFalse(m.verify(keys, combinedShort, data_wrong2, threshold));
+        assertFalse(m.verify(keys, combinedShort, messageWrong1, threshold));
+        assertFalse(m.verify(keys, combinedShort, messageWrong2, threshold));
     }
 
     @Test
     public void testThreshold() throws NoSuchAlgorithmException, InvalidKeyException {
-        // The following Threshold-inputs are tested:
+        // The following threshold-inputs are tested:
         //  - -1
         //  - 0
         //  - 1
-        //  - Keys.length - 1
-        //  - Keys.length
-        //  - Keys.length + 1
+        //  - keys.size - 1
+        //  - keys.size
+        //  - keys.size + 1
         //  - Some happy path
 
         byte[] message = "".getBytes();
@@ -231,40 +230,34 @@ public class TestStoredKeys {
         // threshold = 1;
         assertTrue(m.verify(keys, combined, message, 1)); // (success)
 
-        // threshold = Keys.length - 1
+        // threshold = keys.size - 1
         assertTrue(m.verify(keys, combined, message, keys.size() - 1)); // (success, unless Keys.length = 1)
 
-        // threshold = Keys.length
+        // threshold = keys.size
         assertTrue(m.verify(keys, combined, message, keys.size())); // (success)
 
-        // threshold = Keys.length + 1
+        // threshold = keys.size + 1
         assertFalse(m.verify(keys, combined, message, keys.size() + 1));
     }
 
     @Test
-    public void Test_Success() throws InvalidKeyException, NoSuchAlgorithmException {
+    public void testSuccess() throws InvalidKeyException, NoSuchAlgorithmException {
         MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
 
         Key k0 = m.generate(0);
         Key k1 = m.generate(1);
         Key k2 = m.generate(2);
 
-        //Key k2 = new Key();
-        //k2.index = k0.index;
-        //k2.key = k0.key;
-
         byte[] message = "hello world".getBytes();
 
         Signature s0 = m.sign(k0, message);
-        Signature s1 = m.sign(k1, message);
         Signature s2 = m.sign(k2, message);
 
-        List<Signature> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s1);
-        Signatures.add(s2);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
 
-        Signature combined = m.combine(Signatures);
+        Signature combined = m.combine(signatures);
 
         List<Key> keys = new ArrayList<>();
         keys.add(k0);
@@ -273,6 +266,5 @@ public class TestStoredKeys {
         int threshold = 2;
 
         System.out.println(m.verify(keys, combined, message, threshold));
-
     }
 }

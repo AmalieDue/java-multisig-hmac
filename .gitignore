@@ -6,5 +6,6 @@ target/
 # Files
 *.iml
 .DS_Store
-src/.DS-Store
-src/main/.DS-Store
+src/.DS_Store
+src/main/.DS_Store
+src/test/java/dk/hyperdivision/.DS_Store

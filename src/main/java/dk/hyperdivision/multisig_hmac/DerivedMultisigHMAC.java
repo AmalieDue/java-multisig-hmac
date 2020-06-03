@@ -107,7 +107,7 @@ public class DerivedMultisigHMAC extends MultisigHMAC {
      * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
      */
     public boolean verify(byte[] masterKey, Signature signatures, byte[] message, int threshold) throws NoSuchAlgorithmException, InvalidKeyException {
-        assert masterKey.length == KEYBYTES : "MasterSeed must be KEYBYTES long";
+        assert masterKey.length == KEYBYTES : "Master key must be KEYBYTES long";
         assert signatures.signature.length == BYTES: "Signature must be BYTES long";
         assert threshold > 0 : "Threshold must be at least 1";
 

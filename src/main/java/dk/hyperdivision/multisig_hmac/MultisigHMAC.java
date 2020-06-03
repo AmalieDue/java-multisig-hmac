@@ -159,7 +159,7 @@ public class MultisigHMAC {
         int bitField = signatures.index;
         int nKeys = popCount(bitField);
         int highestKey = 32 - leadingZeros(bitField);
-        assert keys.size() >= nKeys && keys.size() >= highestKey : "Not enough keys given based on signatures.index";
+        assert keys.size() >= nKeys && keys.size() >= highestKey : "Not enough keys given based on index of the combined-Signature";
 
         if (nKeys < threshold) {
             return false;
