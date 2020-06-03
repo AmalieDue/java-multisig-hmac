@@ -18,26 +18,29 @@ public class StoredKeys {
     public static void main(String[] args) {
     
         MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
-        KeyGen k0 = new KeyGen(0, m.KEYBYTES);
-        KeyGen k1 = new KeyGen(1, m.KEYBYTES);
-        KeyGen k2 = new KeyGen(2, m.KEYBYTES);
 
-        byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.getPRIMITIVE());
-        Sign s2 = new Sign(k2, Data, m.getPRIMITIVE());
+        Key k0 = m.generate(0);
+        Key k1 = m.generate(1);
+        Key k2 = m.generate(2);
 
-        List<Sign> Signatures = new ArrayList<>();
-        List<IndexKey> Keys = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
-        Keys.add(k0);
-        Keys.add(k1);
-        Keys.add(k2);
-        int Threshold = 2;
+        byte[] message = "hello world".getBytes();
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature s0 = m.sign(k0, message);
+        Signature s2 = m.sign(k2, message);
 
-        System.out.print(Verify.verify(Keys, combined, Data, Threshold, m.getPRIMITIVE(), m.BYTES));
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
+    
+        Signature combined = m.combine(signatures);
+
+        List<Key> keys = new ArrayList<>();
+        keys.add(k0);
+        keys.add(k1);
+        keys.add(k2);
+        int threshold = 2;
+
+        System.out.println(m.verify(keys, combined, message, threshold));
     }
 }
 ```
@@ -52,35 +55,29 @@ public class DerivedKeys {
 
     public static void main(String[] args) {
     
-        MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
+        DerivedMultisigHMAC m = new DerivedMultisigHMAC(DerivedMultisigHMAC.Algorithm.HmacSHA256);
         
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.getPRIMITIVE());
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.getPRIMITIVE());
-        DeriveKey k2 = new DeriveKey(Seed, 2, m.getPRIMITIVE());
+        byte[] masterKey = m.generateMasterKey();
 
-        byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.getPRIMITIVE());
-        Sign s2 = new Sign(k2, Data, m.getPRIMITIVE());
+        Key k0 = m.generate(0, masterKey);
+        Key k1 = m.generate(1, masterKey);
+        Key k2 = m.generate(2, masterKey);
 
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
-        int Threshold = 2;
+        byte[] message = "hello world".getBytes();
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature s0 = m.sign(k0, message);
+        Signature s2 = m.sign(k2, message);
 
-        System.out.print(VerifyDerived.verifyderived(Seed, combined, Data, Threshold, m.getPRIMITIVE(), m.KEYBYTES, m.BYTES));
+        List<Sign> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
+        int threshold = 2;
+
+        Signature combined = m.combine(signatures);
+
+        System.out.print(m.verify(masterKey, combined, message, threshold));
     }
 }
-```
-
-## Build
-
-### Run Maven
-
-```
-mvn clean install
 ```
 
 ## License
