@@ -2,9 +2,9 @@
 .idea/
 out/
 target/
-src/.DS-Store
-src/main/.DS-Store
-
 
 # Files
-*.iml
+#*.iml
+.DS_Store
+src/.DS-Store
+src/main/.DS-Store
