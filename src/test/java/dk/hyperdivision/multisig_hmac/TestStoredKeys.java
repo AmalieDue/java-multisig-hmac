@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,8 +15,6 @@ public class TestStoredKeys {
     Key k0 = m.generate(0);
     Key k1 = m.generate(1);
     Key k2 = m.generate(2);
-
-    AssertionError exception;
 
     @Test
     public void simpleTest() throws InvalidKeyException, NoSuchAlgorithmException {
@@ -69,15 +66,19 @@ public class TestStoredKeys {
         List<Key> keys = new ArrayList<>();
         int threshold = 2;
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(keys, combined, message, threshold));
-        assertEquals("Not enough keys given based on index of the combined-Signature", exception.getMessage());
+        try {
+            m.verify(keys, combined, message, threshold);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Not enough keys given based on index of the combined-Signature");
+        }
 
         // missing some keys
         keys.add(k0);
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(keys, combined, message, threshold));
-        assertEquals("Not enough keys given based on index of the combined-Signature", exception.getMessage());
+        try {
+            m.verify(keys, combined, message, threshold);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Not enough keys given based on index of the combined-Signature");
+        }
 
         // too many keys
         keys.add(k1);
@@ -120,9 +121,11 @@ public class TestStoredKeys {
         // empty signature
         combined.signature = "".getBytes();
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(keys, combined, message, threshold));
-        assertEquals("Signature must be BYTES long", exception.getMessage());
+        try {
+            m.verify(keys, combined, message, threshold);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Signature must be BYTES long");
+        }
 
         // signature with wrong index
         Signature combined1 = m.combine(signatures);
@@ -218,16 +221,20 @@ public class TestStoredKeys {
         Signature combined = m.combine(signatures);
 
         // threshold = -1
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(keys, combined, message, -1));
-        assertEquals("Threshold must be at least 1", exception.getMessage());
+        try {
+            m.verify(keys, combined, message, -1);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Threshold must be at least 1");
+        }
 
-        // threshold = 0;
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(keys, combined, message, 0));
-        assertEquals("Threshold must be at least 1", exception.getMessage());
+        // threshold = 0
+        try {
+            m.verify(keys, combined, message, 0);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Threshold must be at least 1");
+        }
 
-        // threshold = 1;
+        // threshold = 1
         assertTrue(m.verify(keys, combined, message, 1)); // (success)
 
         // threshold = keys.size - 1

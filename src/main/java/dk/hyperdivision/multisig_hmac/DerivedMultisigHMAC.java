@@ -42,11 +42,11 @@ public class DerivedMultisigHMAC extends MultisigHMAC {
     }
 
     /**
-     * Derives a new sub key from a master seed.
+     * Derives a new sub key from a master seed
      *
      * Note that index should be counted from 0.
-     * The bitfield used with the signature has as many bits as the largest index,
-     * hence in practice you want to keep the indexes low.
+     * The bitfield/index used with the signature has as many bits as the
+     * largest index, hence in practice you want to keep the indexes low.
      *
      * Keys are derived using a KDF based on HMAC:
      * b[0...BYTES] = HMAC(Key = masterKey, data = "derived" || U32LE(index) || 0x00)
@@ -106,10 +106,11 @@ public class DerivedMultisigHMAC extends MultisigHMAC {
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
      * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
      */
-    public boolean verify(byte[] masterKey, Signature signatures, byte[] message, int threshold) throws NoSuchAlgorithmException, InvalidKeyException {
-        assert masterKey.length == KEYBYTES : "Master key must be KEYBYTES long";
-        assert signatures.signature.length == BYTES: "Signature must be BYTES long";
-        assert threshold > 0 : "Threshold must be at least 1";
+    public boolean verify(byte[] masterKey, Signature signatures, byte[] message, int threshold) throws NoSuchAlgorithmException, InvalidKeyException, IllegalArgumentException {
+        if (masterKey.length != KEYBYTES) throw new IllegalArgumentException("Master key must be KEYBYTES long");
+        if (signatures.signature.length != BYTES) throw new IllegalArgumentException("Signature must be BYTES long");
+        if (message == null) throw new IllegalArgumentException("message must be bytes");
+        if (threshold <= 0) throw new IllegalArgumentException("Threshold must be at least 1");
 
         int bitField = signatures.index;
         int nKeys = popCount(bitField);

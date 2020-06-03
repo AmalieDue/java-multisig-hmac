@@ -1,7 +1,7 @@
 package dk.hyperdivision.multisig_hmac;
 
 /**
- * Key represents an instance of an index + cryptographically random key pair.
+ * Key represents an instance of an index + cryptographically random key pair
  *
  * @author Amalie Due Jensen
  */

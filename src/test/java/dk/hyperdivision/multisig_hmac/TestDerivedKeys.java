@@ -8,13 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestDerivedKeys {
     DerivedMultisigHMAC m = new DerivedMultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
-
-    AssertionError exception;
 
     // Inputs to the DerivedMultisigHMAC.verify method have the following equiv classes
 
@@ -44,17 +40,21 @@ public class TestDerivedKeys {
         // no master key
         byte[] noMasterKey = "".getBytes();
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(noMasterKey, combined, message, 2));
-        assertEquals("Master key must be KEYBYTES long", exception.getMessage());
+        try {
+            m.verify(noMasterKey, combined, message, 2);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Master key must be KEYBYTES long");
+        }
 
         // masterKey.length - 1
         byte[] shortMasterKey = new byte[m.getKEYBYTES() - 1];
         System.arraycopy(masterKey, 0, shortMasterKey, 0, m.getKEYBYTES() - 1);
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(shortMasterKey, combined, message, 2));
-        assertEquals("Master key must be KEYBYTES long", exception.getMessage());
+        try {
+            m.verify(shortMasterKey, combined, message, 2);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Master key must be KEYBYTES long");
+        }
 
         // masterKey.length
         assertTrue(m.verify(masterKey, combined, message, 2));
@@ -63,9 +63,11 @@ public class TestDerivedKeys {
         byte[] ZERO = new byte[] {0x00};
         byte[] longMasterKey = ByteBuffer.allocate(m.getKEYBYTES() + 1).put(masterKey).put(ZERO).array();
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(longMasterKey, combined, message, 2));
-        assertEquals("Master key must be KEYBYTES long", exception.getMessage());
+        try {
+            m.verify(longMasterKey, combined, message, 2);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Master key must be KEYBYTES long");
+        }
 
         // wrong master key
         byte[] keyNew = m.generateMasterKey();
@@ -100,9 +102,11 @@ public class TestDerivedKeys {
         // empty signature
         combined.signature = "".getBytes();
 
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(masterKey, combined, message, 2));
-        assertEquals("Signature must be BYTES long", exception.getMessage());
+        try {
+            m.verify(masterKey, combined, message, 2);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Signature must be BYTES long");
+        }
 
         // signature with wrong index
         Signature combined1 = m.combine(signatures);
@@ -200,14 +204,18 @@ public class TestDerivedKeys {
         Signature combined = m.combine(signatures);
 
         // threshold = -1
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(masterKey, combined, message, -1));
-        assertEquals("Threshold must be at least 1", exception.getMessage());
+        try {
+            m.verify(masterKey, combined, message, -1);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Threshold must be at least 1");
+        }
 
         // threshold = 0;
-        exception = assertThrows(AssertionError.class, () ->
-                m.verify(masterKey, combined, message, 0));
-        assertEquals("Threshold must be at least 1", exception.getMessage());
+        try {
+            m.verify(masterKey, combined, message, 0);
+        } catch (IllegalArgumentException expected) {
+            assert(expected.getMessage()).contains("Threshold must be at least 1");
+        }
 
         // threshold = 1;
         List<Key> keys = new ArrayList<>();
@@ -227,8 +235,6 @@ public class TestDerivedKeys {
 
     @Test
     public void testSuccess() throws NoSuchAlgorithmException, InvalidKeyException {
-        DerivedMultisigHMAC m = new DerivedMultisigHMAC(DerivedMultisigHMAC.Algorithm.HmacSHA256);
-
         byte[] masterKey = m.generateMasterKey();
 
         Key k0 = m.generate(0, masterKey);

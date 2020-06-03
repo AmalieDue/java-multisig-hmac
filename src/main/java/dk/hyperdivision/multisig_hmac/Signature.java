@@ -1,7 +1,7 @@
 package dk.hyperdivision.multisig_hmac;
 
 /**
- * Signature represents an instance of an index + signature pair.
+ * Signature represents an instance of an index + signature pair
  *
  * @author Amalie Due Jensen
  */

@@ -14,11 +14,11 @@ import java.util.List;
  * of https://github.com/emilbayes/multisig-hmac.
  *
  * In this case, each of the component keys are stored. The class
- * is extended by the class DerivedMultisigHMAC where a single
+ * is extended by the class DerivedMultisigHMAC in which a single
  * master key is stored and used to derive keys ad hoc.
  *
  * @author Amalie Due Jensen
- * @version 1.0.1
+ * @version 2.0.0
  */
 public class MultisigHMAC {
     protected String PRIMITIVE;
@@ -47,8 +47,8 @@ public class MultisigHMAC {
     }
 
     /**
-     * Constructs and initializes a new instance of Multisig HMAC
-     * and sets the algorithm to be used for subsequent methods.
+     * Constructs and initializes a new instance of MultisigHMAC
+     * and sets the algorithm to be used for subsequent methods
      *
      * @param alg - algorithm used for HMAC
      */
@@ -89,7 +89,7 @@ public class MultisigHMAC {
     /**
      * Independently signs message with a key
      *
-     * @param key - key used for signing which is an instance of Key
+     * @param key - key which is an instance of Key used for signing
      * @param message - message which should be signed
      * @return sign of data which is an instance of Signature
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
@@ -113,15 +113,15 @@ public class MultisigHMAC {
      * @return combined signature as an instance of Signature
      */
     public Signature combine(List<Signature> signatures) {
-        int bitfieldCurrent = 0;
-        byte[] sigCurrent = new byte[BYTES];
+        int indexCurrent = 0;
+        byte[] signatureCurrent = new byte[BYTES];
 
         for (Signature obj: signatures) {
-            bitfieldCurrent ^= obj.index;
-            sigCurrent = xorBytes(sigCurrent, obj.signature);
+            indexCurrent ^= obj.index;
+            signatureCurrent = xorBytes(signatureCurrent, obj.signature);
         }
 
-        return new Signature(bitfieldCurrent, sigCurrent);
+        return new Signature(indexCurrent, signatureCurrent);
     }
 
     /**
@@ -151,15 +151,15 @@ public class MultisigHMAC {
      * @throws InvalidKeyException - if the given key is inappropriate for initializing this HMAC
      * @throws NoSuchAlgorithmException - if the specified algorithm is not available
      */
-    public boolean verify(List<Key> keys, Signature signatures, byte[] message, int threshold) throws InvalidKeyException, NoSuchAlgorithmException {
-        assert signatures.signature.length == BYTES: "Signature must be BYTES long";
-        assert message != null : "data must be bytes";
-        assert threshold > 0 : "Threshold must be at least 1";
+    public boolean verify(List<Key> keys, Signature signatures, byte[] message, int threshold) throws InvalidKeyException, NoSuchAlgorithmException, IllegalArgumentException {
+        if (signatures.signature.length != BYTES) throw new IllegalArgumentException("Signature must be BYTES long");
+        if (message == null) throw new IllegalArgumentException("message must be bytes");
+        if (threshold <= 0) throw new IllegalArgumentException("Threshold must be at least 1");
 
         int bitField = signatures.index;
         int nKeys = popCount(bitField);
         int highestKey = 32 - leadingZeros(bitField);
-        assert keys.size() >= nKeys && keys.size() >= highestKey : "Not enough keys given based on index of the combined-Signature";
+        if (keys.size() < nKeys || keys.size() < highestKey) throw new IllegalArgumentException("Not enough keys given based on index of the combined-Signature");
 
         if (nKeys < threshold) {
             return false;
@@ -176,7 +176,6 @@ public class MultisigHMAC {
         }
 
         return (bitField == 0 && Arrays.equals(sig,new byte[BYTES]));
-
     }
 
     /**
@@ -185,7 +184,7 @@ public class MultisigHMAC {
      * @param bitField - indexes of keys represented as one integer
      * @return indexes of keys in a list
      */
-    public static List<Integer> keyIndexes(int bitField) {
+    protected static List<Integer> keyIndexes(int bitField) {
         List<Integer> keys = new ArrayList<>();
         int i = 0;
         while (bitField > 0) {
@@ -193,6 +192,7 @@ public class MultisigHMAC {
             bitField >>= 1;
             i++;
         }
+
         return keys;
     }
 
@@ -224,6 +224,7 @@ public class MultisigHMAC {
             }
             c = c >> 1;
         }
+
         return n - bitField;
     }
 }
