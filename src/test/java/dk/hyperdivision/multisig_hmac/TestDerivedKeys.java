@@ -14,64 +14,64 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestDerivedKeys {
-    MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
+    DerivedMultisigHMAC m = new DerivedMultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
 
     AssertionError exception;
 
     // Inputs to the VerifyDerived method have the following equiv classes
 
     @Test
-    public void Test_Masterseed() throws NoSuchAlgorithmException, InvalidKeyException {
-        // Masterseed:
-        //  - no masterseed
-        //  - incorrect masterseed (length - 1, length, length + 1, wrong)
-        //  - correct masterseed
+    public void testMasterSeed() throws NoSuchAlgorithmException, InvalidKeyException {
+        // masterSeed:
+        //  - no masterSeed
+        //  - incorrect masterSeed (length - 1, length, length + 1, wrong)
+        //  - correct masterSeed
 
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
+        byte[] masterKey = m.generateMasterKey();
 
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k2 = new DeriveKey(Seed, 2, m.PRIMITIVE);
+        Key k0 = m.generate(0, masterKey);
+        Key k2 = m.generate(2, masterKey);
 
-        byte[] Data = "".getBytes();
+        byte[] message = "".getBytes();
 
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        Signature s0 = m.sign(k0, message);
+        Signature s2 = m.sign(k2, message);
 
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // no masterseed
-        byte[] no_masterseed = "".getBytes();
+        byte[] noMasterseed = "".getBytes();
 
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(no_masterseed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(noMasterseed, combined, message, 2));
         assertEquals("MasterSeed must be KEYBYTES long", exception.getMessage());
 
         // masterseed.length - 1
-        byte[] short_masterseed = new byte[m.KEYBYTES - 1];
-        System.arraycopy(Seed, 0, short_masterseed, 0, m.KEYBYTES - 1);
+        byte[] shortMasterseed = new byte[m.getKEYBYTES() - 1];
+        System.arraycopy(masterKey, 0, shortMasterseed, 0, m.getKEYBYTES() - 1);
 
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(short_masterseed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(shortMasterseed, combined, message, 2));
         assertEquals("MasterSeed must be KEYBYTES long", exception.getMessage());
 
         // masterseed.length
-        assertTrue(VerifyDerived.verifyderived(Seed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        assertTrue(m.verify(masterKey, combined, message, 2));
 
         // masterseed.length + 1
         byte[] ZERO = new byte[] {0x00};
-        byte[] long_masterseed = ByteBuffer.allocate(m.KEYBYTES + 1).put(Seed).put(ZERO).array();
+        byte[] longMasterseed = ByteBuffer.allocate(m.getKEYBYTES() + 1).put(masterKey).put(ZERO).array();
 
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(long_masterseed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(longMasterseed, combined, message, 2));
         assertEquals("MasterSeed must be KEYBYTES long", exception.getMessage());
 
         // wrong masterseed
-        byte[] Seed_new = DeriveKey.SeedGen(m.KEYBYTES);
-        assertFalse(VerifyDerived.verifyderived(Seed_new, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        byte[] seedNew = m.generateMasterKey();
+        assertFalse(m.verify(seedNew, combined, message, 2));
     }
 
     @Test
@@ -83,48 +83,48 @@ public class TestDerivedKeys {
         //  - signature with too few signatures
         //  - signature with exactly correct signatures
 
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
+        byte[] masterKey = m.generateMasterKey();
 
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.PRIMITIVE);
-        DeriveKey k2 = new DeriveKey(Seed, 2, m.PRIMITIVE);
-        byte[] Data = "".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s1 = new Sign(k1, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        Key k0 = m.generate(0, masterKey);
+        Key k1 = m.generate(1, masterKey);
+        Key k2 = m.generate(2, masterKey);
+        byte[] message = "".getBytes();
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        Signature s2 = m.sign(k2, message);
 
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // empty signature
-        combined.sig = "".getBytes();
+        combined.signature = "".getBytes();
 
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(Seed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(masterKey, combined, message, 2));
         assertEquals("Signature must be BYTES long", exception.getMessage());
 
         // signature with wrong bitfield
-        Combine combined1 = new Combine(Signatures, m.BYTES);
-        combined1.bitfield = 0;
-        assertFalse(VerifyDerived.verifyderived(Seed, combined1, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        Signature combined1 = m.combine(signatures);
+        combined1.index = 0;
+        assertFalse(m.verify(masterKey, combined1, message, 2));
 
         // signature with too many signatures
-        List<Sign> SignaturesTooMany = new ArrayList<>();
-        SignaturesTooMany.add(s0);
-        SignaturesTooMany.add(s1);
-        SignaturesTooMany.add(s2);
+        List<Signature> signaturesTooMany = new ArrayList<>();
+        signaturesTooMany.add(s0);
+        signaturesTooMany.add(s1);
+        signaturesTooMany.add(s2);
 
-        Combine combined2 = new Combine(SignaturesTooMany, m.BYTES);
-        combined2.bitfield = combined1.bitfield;
-        assertFalse(VerifyDerived.verifyderived(Seed, combined2, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        Signature combined2 = m.combine(signaturesTooMany);
+        combined2.index = combined1.index;
+        assertFalse(m.verify(masterKey, combined2, message, 2));
 
         // signature with too few signatures
-        Combine combined3 = new Combine(SignaturesTooMany, m.BYTES);
-        combined3.sig = combined1.sig;
-        assertFalse(VerifyDerived.verifyderived(Seed, combined3, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        Signature combined3 = m.combine(signaturesTooMany);
+        combined3.signature = combined1.signature;
+        assertFalse(m.verify(masterKey, combined3, message, 2));
     }
 
     @Test
@@ -133,48 +133,48 @@ public class TestDerivedKeys {
         //  - Empty, less than block size, larger than block size
         //  - Incorrect data (length - 1, length, length + 1, wrong data)
 
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
+        byte[] masterKey = m.generateMasterKey();
 
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.PRIMITIVE);
+        Key k0 = m.generate(0, masterKey);
+        Key k1 = m.generate(1, masterKey);
 
         // empty, less than block size, larger than block size
-        byte[] data_empty = "".getBytes();
-        byte[] data_short = "hello world".getBytes();
+        byte[] dataEmpty = "".getBytes();
+        byte[] dataShort = "hello world".getBytes();
         String str = "hello world";
-        byte[] data_long = str.repeat(100).getBytes();
+        byte[] dataLong = str.repeat(100).getBytes();
 
-        Sign s0_empty = new Sign(k0, data_empty, m.PRIMITIVE);
-        Sign s1_empty = new Sign(k1, data_empty, m.PRIMITIVE);
-        Sign s0_short = new Sign(k0, data_short, m.PRIMITIVE);
-        Sign s1_short = new Sign(k1, data_short, m.PRIMITIVE);
-        Sign s0_long = new Sign(k0, data_long, m.PRIMITIVE);
-        Sign s1_long = new Sign(k1, data_long, m.PRIMITIVE);
+        Signature s0_empty = m.sign(k0, dataEmpty);
+        Signature s1_empty = m.sign(k1, dataEmpty);
+        Signature s0_short = m.sign(k0, dataShort);
+        Signature s1_short = m.sign(k1, dataShort);
+        Signature s0_long = m.sign(k0, dataLong);
+        Signature s1_long = m.sign(k1, dataLong);
 
-        List<Sign> Signatures_empty = new ArrayList<>();
-        List<Sign> Signatures_short = new ArrayList<>();
-        List<Sign> Signatures_long = new ArrayList<>();
-        Signatures_empty.add(s0_empty);
-        Signatures_empty.add(s1_empty);
-        Signatures_short.add(s0_short);
-        Signatures_short.add(s1_short);
-        Signatures_long.add(s0_long);
-        Signatures_long.add(s1_long);
+        List<Signature> signaturesEmpty = new ArrayList<>();
+        List<Signature> signaturesShort = new ArrayList<>();
+        List<Signature> signaturesLong = new ArrayList<>();
+        signaturesEmpty.add(s0_empty);
+        signaturesEmpty.add(s1_empty);
+        signaturesShort.add(s0_short);
+        signaturesShort.add(s1_short);
+        signaturesLong.add(s0_long);
+        signaturesLong.add(s1_long);
 
-        Combine combined_empty = new Combine(Signatures_empty, m.BYTES);
-        Combine combined_short = new Combine(Signatures_short, m.BYTES);
-        Combine combined_long = new Combine(Signatures_long, m.BYTES);
+        Signature combined_empty = m.combine(signaturesEmpty);
+        Signature combined_short = m.combine(signaturesShort);
+        Signature combined_long = m.combine(signaturesLong);
 
-        assertTrue(VerifyDerived.verifyderived(Seed, combined_empty, data_empty, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
-        assertTrue(VerifyDerived.verifyderived(Seed, combined_short, data_short, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
-        assertTrue(VerifyDerived.verifyderived(Seed, combined_long, data_long, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        assertTrue(m.verify(masterKey, combined_empty, dataEmpty, 2));
+        assertTrue(m.verify(masterKey, combined_short, dataShort, 2));
+        assertTrue(m.verify(masterKey, combined_long, dataLong, 2));
 
         // incorrect data
         byte[] data_wrong1 = "hello worl".getBytes();
         byte[] data_wrong2 = "hello worldd".getBytes();
 
-        assertFalse(VerifyDerived.verifyderived(Seed, combined_short, data_wrong1, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
-        assertFalse(VerifyDerived.verifyderived(Seed, combined_short, data_wrong2, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        assertFalse(m.verify(masterKey, combined_short, data_wrong1, 2));
+        assertFalse(m.verify(masterKey, combined_short, data_wrong2, 2));
     }
 
     @Test
@@ -188,62 +188,70 @@ public class TestDerivedKeys {
         //  - Keys.length + 1
         //  - Some happy path
 
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
+        byte[] masterKey = m.generateMasterKey();
 
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.PRIMITIVE);
-        byte[] Data = "".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s1 = new Sign(k1, Data, m.PRIMITIVE);
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s1);
+        Key k0 = m.generate(0, masterKey);
+        Key k1 = m.generate(1, masterKey);
+        byte[] message = "".getBytes();
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s1);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // threshold = -1
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(Seed, combined, Data, -1, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(masterKey, combined, message, -1));
         assertEquals("Threshold must be at least 1", exception.getMessage());
 
         // threshold = 0;
         exception = assertThrows(AssertionError.class, () ->
-                VerifyDerived.verifyderived(Seed, combined, Data, 0, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+                m.verify(masterKey, combined, message, 0));
         assertEquals("Threshold must be at least 1", exception.getMessage());
 
         // threshold = 1;
-        List<IndexKey> Keys = new ArrayList<>();
+        List<Key> Keys = new ArrayList<>();
         Keys.add(k0);
         Keys.add(k1);
-        assertTrue(VerifyDerived.verifyderived(Seed, combined, Data, 1, m.PRIMITIVE, m.KEYBYTES, m.BYTES)); // (success)
+        assertTrue(m.verify(masterKey, combined, message, 1)); // (success)
 
         // threshold = Keys.length - 1
-        assertTrue(VerifyDerived.verifyderived(Seed, combined, Data, Keys.size() - 1, m.PRIMITIVE, m.KEYBYTES, m.BYTES)); // (success, unless Keys.length = 1)
+        assertTrue(m.verify(masterKey, combined, message, Keys.size() - 1)); // (success, unless Keys.length = 1)
 
         // threshold = Keys.length
-        assertTrue(VerifyDerived.verifyderived(Seed, combined, Data, Keys.size(), m.PRIMITIVE, m.KEYBYTES, m.BYTES)); // (success)
+        assertTrue(m.verify(masterKey, combined, message, Keys.size())); // (success)
 
         // threshold = Keys.length + 1
-        assertFalse(VerifyDerived.verifyderived(Seed, combined, Data, Keys.size() + 1, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        assertFalse(m.verify(masterKey, combined, message, Keys.size() + 1));
     }
 
     @Test
     public void Test_Success() throws NoSuchAlgorithmException, InvalidKeyException {
-        byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.PRIMITIVE);
-        DeriveKey k2 = new DeriveKey(Seed, 2, m.PRIMITIVE);
+        DerivedMultisigHMAC m = new DerivedMultisigHMAC(DerivedMultisigHMAC.Algorithm.HmacSHA256);
 
-        byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        byte[] masterKey = m.generateMasterKey();
 
-        List<Sign> Signatures = new ArrayList<>();
+        Key k0 = m.generate(0, masterKey);
+        Key k1 = m.generate(1, masterKey);
+        Key k2 = m.generate(2, masterKey);
+
+        byte[] message = "hello world".getBytes();
+
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        Signature s2 = m.sign(k2, message);
+
+        List<Signature> Signatures = new ArrayList<>();
         Signatures.add(s0);
+        Signatures.add(s1);
         Signatures.add(s2);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(Signatures);
 
-        assertTrue(VerifyDerived.verifyderived(Seed, combined, Data, 2, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        int Threshold = 2;
+
+        System.out.println(m.verify(masterKey, combined, message, Threshold));
     }
 }

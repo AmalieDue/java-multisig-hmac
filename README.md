@@ -12,8 +12,6 @@ Example using stored keys:
 package dk.hyperdivision.multisig_hmac;
 
 import java.util.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 public class StoredKeys {
 
@@ -25,8 +23,8 @@ public class StoredKeys {
         KeyGen k2 = new KeyGen(2, m.KEYBYTES);
 
         byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        Sign s0 = new Sign(k0, Data, m.getPRIMITIVE());
+        Sign s2 = new Sign(k2, Data, m.getPRIMITIVE());
 
         List<Sign> Signatures = new ArrayList<>();
         List<IndexKey> Keys = new ArrayList<>();
@@ -39,7 +37,7 @@ public class StoredKeys {
 
         Combine combined = new Combine(Signatures, m.BYTES);
 
-        System.out.print(Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        System.out.print(Verify.verify(Keys, combined, Data, Threshold, m.getPRIMITIVE(), m.BYTES));
     }
 }
 ```
@@ -49,8 +47,6 @@ Example using derived keys:
 package dk.hyperdivision.multisig_hmac;
 
 import java.util.*;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 public class DerivedKeys {
 
@@ -59,13 +55,13 @@ public class DerivedKeys {
         MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
         
         byte[] Seed = DeriveKey.SeedGen(m.KEYBYTES);
-        DeriveKey k0 = new DeriveKey(Seed, 0, m.PRIMITIVE);
-        DeriveKey k1 = new DeriveKey(Seed, 1, m.PRIMITIVE);
-        DeriveKey k2 = new DeriveKey(Seed, 2, m.PRIMITIVE);
+        DeriveKey k0 = new DeriveKey(Seed, 0, m.getPRIMITIVE());
+        DeriveKey k1 = new DeriveKey(Seed, 1, m.getPRIMITIVE());
+        DeriveKey k2 = new DeriveKey(Seed, 2, m.getPRIMITIVE());
 
         byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        Sign s0 = new Sign(k0, Data, m.getPRIMITIVE());
+        Sign s2 = new Sign(k2, Data, m.getPRIMITIVE());
 
         List<Sign> Signatures = new ArrayList<>();
         Signatures.add(s0);
@@ -74,7 +70,7 @@ public class DerivedKeys {
 
         Combine combined = new Combine(Signatures, m.BYTES);
 
-        System.out.print(VerifyDerived.verifyderived(Seed, combined, Data, Threshold, m.PRIMITIVE, m.KEYBYTES, m.BYTES));
+        System.out.print(VerifyDerived.verifyderived(Seed, combined, Data, Threshold, m.getPRIMITIVE(), m.KEYBYTES, m.BYTES));
     }
 }
 ```

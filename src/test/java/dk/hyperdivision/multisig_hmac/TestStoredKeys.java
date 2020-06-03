@@ -13,35 +13,36 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class TestStoredKeys {
     MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
-    KeyGen k0 = new KeyGen(0, m.KEYBYTES);
-    KeyGen k1 = new KeyGen(1, m.KEYBYTES);
-    KeyGen k2 = new KeyGen(2, m.KEYBYTES);
+
+    Key k0 = m.generate(0);
+    Key k1 = m.generate(1);
+    Key k2 = m.generate(2);
 
     AssertionError exception;
 
     @Test
-    public void SimpleTest() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void SimpleTest() throws InvalidKeyException, NoSuchAlgorithmException {
         assertNotNull(k0.key);
         assertEquals(k0.key.length, m.KEYBYTES);
 
         // The data-input to the Sign class has 3 equiv classes: Empty, less
         // than block size, larger than block size. These are tested below
-        byte[] data_empty = "".getBytes();
-        byte[] data_short = "hello world".getBytes();
+        byte[] dataEmpty = "".getBytes();
+        byte[] dataShort = "hello world".getBytes();
         String str = "hello world";
-        byte[] data_long = str.repeat(100).getBytes();
+        byte[] dataLong = str.repeat(100).getBytes();
 
-        Sign s_empty = new Sign(k0, data_empty, m.PRIMITIVE);
-        Sign s_short = new Sign(k0, data_short, m.PRIMITIVE);
-        Sign s_long = new Sign(k0, data_long, m.PRIMITIVE);
-        assertEquals(s_empty.sign.length, m.BYTES);
-        assertEquals(s_short.sign.length, m.BYTES);
-        assertEquals(s_long.sign.length, m.BYTES);
+        Signature sEmpty = m.sign(k0, dataEmpty);
+        Signature sShort = m.sign(k0, dataShort);
+        Signature sLong = m.sign(k0, dataLong);
+        assertEquals(sEmpty.signature.length, m.BYTES);
+        assertEquals(sShort.signature.length, m.BYTES);
+        assertEquals(sLong.signature.length, m.BYTES);
 
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s_empty);
-        Combine combined = new Combine(Signatures, m.BYTES);
-        assertEquals(combined.sig.length, m.BYTES);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(sEmpty);
+        Signature combined = m.combine(signatures);
+        assertEquals(combined.signature.length, m.getBYTES());
     }
 
     // The inputs to the Verify method have more equiv classes
@@ -55,41 +56,41 @@ public class TestStoredKeys {
         //  - keys in random order
         //  - keys in right order
 
-        byte[] Data = "".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        byte[] message = "".getBytes();
+        Signature s0 = m.sign(k0, message);
+        Signature s2 = m.sign(k2, message);
 
-        List<Sign> Signatures = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
+        List<Signature> signatures = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // no keys
-        List<IndexKey> Keys = new ArrayList<>();
-        int Threshold = 2;
+        List<Key> keys = new ArrayList<>();
+        int threshold = 2;
 
         exception = assertThrows(AssertionError.class, () ->
-                Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+                m.verify(keys, combined, message, threshold));
         assertEquals("Not enough keys given based on Signature.bitfield", exception.getMessage());
 
         // missing some keys
-        Keys.add(k0);
+        keys.add(k0);
         exception = assertThrows(AssertionError.class, () ->
-                Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+                m.verify(keys, combined, message, threshold));
         assertEquals("Not enough keys given based on Signature.bitfield", exception.getMessage());
 
         // too many keys
-        Keys.add(k1);
-        Keys.add(k2);
-        assertTrue(Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES)); // (success)
+        keys.add(k1);
+        keys.add(k2);
+        assertTrue(m.verify(keys, combined, message, threshold)); // (success)
 
         // keys in random order
-        List<IndexKey> KeysRandom = new ArrayList<>();
-        KeysRandom.add(k0);
-        KeysRandom.add(k2);
-        KeysRandom.add(k1);
-        assertFalse(Verify.verify(KeysRandom, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        List<Key> keysRandom = new ArrayList<>();
+        keysRandom.add(k0);
+        keysRandom.add(k2);
+        keysRandom.add(k1);
+        assertFalse(m.verify(keysRandom, combined, message, threshold));
     }
 
     @Test
@@ -101,101 +102,101 @@ public class TestStoredKeys {
         //  - signature with too few signatures
         //  - signature with exactly correct signatures
 
-        byte[] Data = "".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s1 = new Sign(k1, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+        byte[] message = "".getBytes();
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        Signature s2 = m.sign(k2, message);
 
-        List<Sign> Signatures = new ArrayList<>();
-        List<IndexKey> Keys = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s2);
-        Keys.add(k0);
-        Keys.add(k1);
-        Keys.add(k2);
-        int Threshold = 2;
+        List<Signature> signatures = new ArrayList<>();
+        List<Key> keys = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s2);
+        keys.add(k0);
+        keys.add(k1);
+        keys.add(k2);
+        int threshold = 2;
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // empty signature
-        combined.sig = "".getBytes();
+        combined.signature = "".getBytes();
 
         exception = assertThrows(AssertionError.class, () ->
-                Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+                m.verify(keys, combined, message, threshold));
         assertEquals("Signature must be BYTES long", exception.getMessage());
 
         // signature with wrong bitfield
-        Combine combined1 = new Combine(Signatures, m.BYTES);
-        combined1.bitfield = 0;
-        assertFalse(Verify.verify(Keys, combined1, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        Signature combined1 = m.combine(signatures);
+        combined1.index = 0;
+        assertFalse(m.verify(keys, combined1, message, threshold));
 
         // signature with too many signatures
-        List<Sign> SignaturesTooMany = new ArrayList<>();
-        SignaturesTooMany.add(s0);
-        SignaturesTooMany.add(s1);
-        SignaturesTooMany.add(s2);
+        List<Signature> signaturesTooMany = new ArrayList<>();
+        signaturesTooMany.add(s0);
+        signaturesTooMany.add(s1);
+        signaturesTooMany.add(s2);
 
-        Combine combined2 = new Combine(SignaturesTooMany, m.BYTES);
-        combined2.bitfield = combined1.bitfield;
-        assertFalse(Verify.verify(Keys, combined2, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        Signature combined2 = m.combine(signaturesTooMany);
+        combined2.index = combined1.index;
+        assertFalse(m.verify(keys, combined2, message, threshold));
 
         // signature with too few signatures
-        Combine combined3 = new Combine(SignaturesTooMany, m.BYTES);
-        combined3.sig = combined1.sig;
-        assertFalse(Verify.verify(Keys, combined3, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        Signature combined3 = m.combine(signaturesTooMany);
+        combined3.signature = combined1.signature;
+        assertFalse(m.verify(keys, combined3, message, threshold));
     }
 
     @Test
-    public void Test_Data() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void testData() throws NoSuchAlgorithmException, InvalidKeyException {
         // The following Data-inputs are tested:
         //  - Same equiv classes as for the Sign method
         //  - Incorrect data (length - 1, length, length + 1, wrong data)
 
         // same equiv classes as for the sign function
-        byte[] data_empty = "".getBytes();
-        byte[] data_short = "hello world".getBytes();
+        byte[] dataEmpty = "".getBytes();
+        byte[] dataShort = "hello world".getBytes();
         String str = "hello world";
-        byte[] data_long = str.repeat(100).getBytes();
+        byte[] dataLong = str.repeat(100).getBytes();
 
-        Sign s0_empty = new Sign(k0, data_empty, m.PRIMITIVE);
-        Sign s1_empty = new Sign(k1, data_empty, m.PRIMITIVE);
-        Sign s0_short = new Sign(k0, data_short, m.PRIMITIVE);
-        Sign s1_short = new Sign(k1, data_short, m.PRIMITIVE);
-        Sign s0_long = new Sign(k0, data_long, m.PRIMITIVE);
-        Sign s1_long = new Sign(k1, data_long, m.PRIMITIVE);
+        Signature s0_empty = m.sign(k0, dataEmpty);
+        Signature s1_empty = m.sign(k1, dataEmpty);
+        Signature s0_short = m.sign(k0, dataShort);
+        Signature s1_short = m.sign(k1, dataShort);
+        Signature s0_long = m.sign(k0, dataLong);
+        Signature s1_long = m.sign(k1, dataLong);
 
-        List<Sign> Signatures_empty = new ArrayList<>();
-        List<Sign> Signatures_short = new ArrayList<>();
-        List<Sign> Signatures_long = new ArrayList<>();
-        List<IndexKey> Keys = new ArrayList<>();
-        Signatures_empty.add(s0_empty);
-        Signatures_empty.add(s1_empty);
-        Signatures_short.add(s0_short);
-        Signatures_short.add(s1_short);
-        Signatures_long.add(s0_long);
-        Signatures_long.add(s1_long);
-        Keys.add(k0);
-        Keys.add(k1);
-        int Threshold = 2;
+        List<Signature> signaturesEmpty = new ArrayList<>();
+        List<Signature> signaturesShort = new ArrayList<>();
+        List<Signature> signaturesLong = new ArrayList<>();
+        List<Key> keys = new ArrayList<>();
+        signaturesEmpty.add(s0_empty);
+        signaturesEmpty.add(s1_empty);
+        signaturesShort.add(s0_short);
+        signaturesShort.add(s1_short);
+        signaturesLong.add(s0_long);
+        signaturesLong.add(s1_long);
+        keys.add(k0);
+        keys.add(k1);
+        int threshold = 2;
 
-        Combine combined_empty = new Combine(Signatures_empty, m.BYTES);
-        Combine combined_short = new Combine(Signatures_short, m.BYTES);
-        Combine combined_long = new Combine(Signatures_long, m.BYTES);
+        Signature combinedEmpty = m.combine(signaturesEmpty);
+        Signature combinedShort = m.combine(signaturesShort);
+        Signature combinedLong = m.combine(signaturesLong);
 
-        assertTrue(Verify.verify(Keys, combined_empty, data_empty, Threshold, m.PRIMITIVE, m.BYTES));
-        assertTrue(Verify.verify(Keys, combined_short, data_short, Threshold, m.PRIMITIVE, m.BYTES));
-        assertTrue(Verify.verify(Keys, combined_long, data_long, Threshold, m.PRIMITIVE, m.BYTES));
+        assertTrue(m.verify(keys, combinedEmpty, dataEmpty, threshold));
+        assertTrue(m.verify(keys, combinedShort, dataShort, threshold));
+        assertTrue(m.verify(keys, combinedLong, dataLong, threshold));
 
         // incorrect data
         byte[] data_wrong1 = "hello worl".getBytes();
         byte[] data_wrong2 = "hello worldd".getBytes();
 
-        assertFalse(Verify.verify(Keys, combined_short, data_wrong1, Threshold, m.PRIMITIVE, m.BYTES));
-        assertFalse(Verify.verify(Keys, combined_short, data_wrong2, Threshold, m.PRIMITIVE, m.BYTES));
+        assertFalse(m.verify(keys, combinedShort, data_wrong1, threshold));
+        assertFalse(m.verify(keys, combinedShort, data_wrong2, threshold));
     }
 
     @Test
-    public void Test_Threshold() throws NoSuchAlgorithmException, InvalidKeyException {
+    public void testThreshold() throws NoSuchAlgorithmException, InvalidKeyException {
         // The following Threshold-inputs are tested:
         //  - -1
         //  - 0
@@ -205,58 +206,73 @@ public class TestStoredKeys {
         //  - Keys.length + 1
         //  - Some happy path
 
-        byte[] Data = "".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s1 = new Sign(k1, Data, m.PRIMITIVE);
-        List<Sign> Signatures = new ArrayList<>();
-        List<IndexKey> Keys = new ArrayList<>();
-        Signatures.add(s0);
-        Signatures.add(s1);
-        Keys.add(k0);
-        Keys.add(k1);
+        byte[] message = "".getBytes();
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        List<Signature> signatures = new ArrayList<>();
+        List<Key> keys = new ArrayList<>();
+        signatures.add(s0);
+        signatures.add(s1);
+        keys.add(k0);
+        keys.add(k1);
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(signatures);
 
         // threshold = -1
         exception = assertThrows(AssertionError.class, () ->
-                Verify.verify(Keys, combined, Data, -1, m.PRIMITIVE, m.BYTES));
+                m.verify(keys, combined, message, -1));
         assertEquals("Threshold must be at least 1", exception.getMessage());
 
         // threshold = 0;
         exception = assertThrows(AssertionError.class, () ->
-                Verify.verify(Keys, combined, Data, 0, m.PRIMITIVE, m.BYTES));
+                m.verify(keys, combined, message, 0));
         assertEquals("Threshold must be at least 1", exception.getMessage());
 
         // threshold = 1;
-        assertTrue(Verify.verify(Keys, combined, Data, 1, m.PRIMITIVE, m.BYTES)); // (success)
+        assertTrue(m.verify(keys, combined, message, 1)); // (success)
 
         // threshold = Keys.length - 1
-        assertTrue(Verify.verify(Keys, combined, Data, Keys.size() - 1, m.PRIMITIVE, m.BYTES)); // (success, unless Keys.length = 1)
+        assertTrue(m.verify(keys, combined, message, keys.size() - 1)); // (success, unless Keys.length = 1)
 
         // threshold = Keys.length
-        assertTrue(Verify.verify(Keys, combined, Data, Keys.size(), m.PRIMITIVE, m.BYTES)); // (success)
+        assertTrue(m.verify(keys, combined, message, keys.size())); // (success)
 
         // threshold = Keys.length + 1
-        assertFalse(Verify.verify(Keys, combined, Data, Keys.size() + 1, m.PRIMITIVE, m.BYTES));
+        assertFalse(m.verify(keys, combined, message, keys.size() + 1));
     }
 
     @Test
-    public void Test_Success() throws NoSuchAlgorithmException, InvalidKeyException {
-        byte[] Data = "hello world".getBytes();
-        Sign s0 = new Sign(k0, Data, m.PRIMITIVE);
-        Sign s2 = new Sign(k2, Data, m.PRIMITIVE);
+    public void Test_Success() throws InvalidKeyException, NoSuchAlgorithmException {
+        MultisigHMAC m = new MultisigHMAC(MultisigHMAC.Algorithm.HmacSHA256);
 
-        List<Sign> Signatures = new ArrayList<>();
-        List<IndexKey> Keys = new ArrayList<>();
+        Key k0 = m.generate(0);
+        Key k1 = m.generate(1);
+        Key k2 = m.generate(2);
+
+        //Key k2 = new Key();
+        //k2.index = k0.index;
+        //k2.key = k0.key;
+
+        byte[] message = "hello world".getBytes();
+
+        Signature s0 = m.sign(k0, message);
+        Signature s1 = m.sign(k1, message);
+        Signature s2 = m.sign(k2, message);
+
+        List<Signature> Signatures = new ArrayList<>();
         Signatures.add(s0);
+        Signatures.add(s1);
         Signatures.add(s2);
-        Keys.add(k0);
-        Keys.add(k1);
-        Keys.add(k2);
-        int Threshold = 2;
 
-        Combine combined = new Combine(Signatures, m.BYTES);
+        Signature combined = m.combine(Signatures);
 
-        assertTrue(Verify.verify(Keys, combined, Data, Threshold, m.PRIMITIVE, m.BYTES));
+        List<Key> keys = new ArrayList<>();
+        keys.add(k0);
+        keys.add(k1);
+        keys.add(k2);
+        int threshold = 2;
+
+        System.out.println(m.verify(keys, combined, message, threshold));
+
     }
 }
